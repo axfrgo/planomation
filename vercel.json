@@ -1,0 +1,13 @@
+{
+    "buildCommand": "npx nx build web --prod",
+    "outputDirectory": "dist/apps/web/.next",
+    "framework": "nextjs",
+    "installCommand": "npm install",
+    "devCommand": "npx nx serve web",
+    "rewrites": [
+        {
+            "source": "/api/:path*",
+            "destination": "/api/:path*"
+        }
+    ]
+}

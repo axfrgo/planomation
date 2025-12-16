@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum PostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  FAILED
+  ARCHIVED
+}
+
+enum SocialPlatform {
+  FACEBOOK
+  INSTAGRAM
+  TWITTER
+  LINKEDIN
+  TIKTOK
+  YOUTUBE
+}
+
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  planTier  String   @default("FREE") 
+  createdAt DateTime @default(now())
+
+  users          User[]
+  socialAccounts SocialAccount[]
+  posts          Post[]
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  firstName    String?
+  lastName     String?
+  role         Role     @default(OWNER)
+  
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model SocialAccount {
+  id               String   @id @default(uuid())
+  platform         SocialPlatform
+  platformUserId   String
+  accessToken      String   // Encrypted
+  refreshToken     String?  // Encrypted
+  tokenExpiresAt   DateTime?
+  platformMetadata Json?
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  postVariations PostVariation[]
+
+  createdAt DateTime @default(now())
+}
+
+model Post {
+  id          String     @id @default(uuid())
+  content     String
+  status      PostStatus @default(DRAFT)
+  scheduledAt DateTime?
+  publishedAt DateTime?
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  authorId String
+  // author   User   @relation(fields: [authorId], references: [id]) // Optional link to user
+
+  variations PostVariation[]
+  media      PostMedia[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PostVariation {
+  id              String   @id @default(uuid())
+  postId          String
+  post            Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  socialAccountId String
+  socialAccount   SocialAccount @relation(fields: [socialAccountId], references: [id])
+
+  platformSpecificContent String? // If different from main post
+  status                  String? // PENDING, SENT, FAILED
+
+  createdAt DateTime @default(now())
+}
+
+model PostMedia {
+  id       String @id @default(uuid())
+  postId   String
+  post     Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  s3Key    String
+  mimeType String
+  url      String // Presigned or public URL
+
+  createdAt DateTime @default(now())
+}
+
+model SocialConnection {
+  id           String   @id @default(uuid())
+  userId       String
+  platform     String
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+}

@@ -1,0 +1,20 @@
+{
+  "name": "util-auth",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/util-auth/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/util-auth",
+        "tsConfig": "libs/util-auth/tsconfig.lib.json",
+        "packageJson": "libs/util-auth/package.json",
+        "main": "libs/util-auth/src/index.ts",
+        "assets": ["libs/util-auth/*.md"]
+      }
+    }
+  }
+}
