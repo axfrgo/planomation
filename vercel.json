@@ -1,13 +1,8 @@
 {
-    "buildCommand": "npx nx build web --prod",
-    "outputDirectory": "dist/apps/web/.next",
-    "framework": "nextjs",
-    "installCommand": "npm install",
+    "$schema": "https://openapi.vercel.sh/vercel.json",
+    "buildCommand": "cd apps/web && npx next build",
     "devCommand": "npx nx serve web",
-    "rewrites": [
-        {
-            "source": "/api/:path*",
-            "destination": "/api/:path*"
-        }
-    ]
+    "installCommand": "npm install",
+    "framework": null,
+    "outputDirectory": "apps/web/.next"
 }
