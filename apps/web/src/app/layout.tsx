@@ -1,5 +1,6 @@
 import './global.css';
 import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import Script from 'next/script';
 
 export const metadata = {
   title: 'Planomation - Social Media Scheduler',
@@ -11,40 +12,36 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Note: Must use NEXT_PUBLIC_ prefix for client-side access
-  const fbAppId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '';
-
   return (
     <ClerkProvider>
       <html lang="en">
-        <head>
-          {fbAppId && (
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `
-                  window.fbAsyncInit = function() {
-                    FB.init({
-                      appId: '${fbAppId}',
-                      cookie: true,
-                      xfbml: true,
-                      version: 'v18.0'
-                    });
-                    FB.AppEvents.logPageView();
-                  };
-                `
-              }}
-            />
-          )}
-        </head>
         <body className="bg-ios-bg min-h-screen">
-          {fbAppId && (
-            <script
-              async
-              defer
-              crossOrigin="anonymous"
-              src="https://connect.facebook.net/en_US/sdk.js"
-            />
-          )}
+          {/* Facebook SDK - Loaded after page interactive */}
+          <Script
+            id="facebook-sdk"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                window.fbAsyncInit = function() {
+                  FB.init({
+                    appId: '${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || ''}',
+                    cookie: true,
+                    xfbml: true,
+                    version: 'v18.0'
+                  });
+                  FB.AppEvents.logPageView();
+                };
+
+                (function(d, s, id){
+                  var js, fjs = d.getElementsByTagName(s)[0];
+                  if (d.getElementById(id)) {return;}
+                  js = d.createElement(s); js.id = id;
+                  js.src = "https://connect.facebook.net/en_US/sdk.js";
+                  fjs.parentNode.insertBefore(js, fjs);
+                }(document, 'script', 'facebook-jssdk'));
+              `
+            }}
+          />
 
           <header className="sticky top-0 z-50 glass-nav backdrop-blur-md bg-white/80 border-b border-gray-200">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
