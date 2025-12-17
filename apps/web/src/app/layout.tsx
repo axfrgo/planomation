@@ -11,6 +11,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Note: Must use NEXT_PUBLIC_ prefix for client-side access
   const fbAppId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '';
 
   return (
