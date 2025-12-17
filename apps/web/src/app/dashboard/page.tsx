@@ -102,7 +102,15 @@ export default function DashboardPage() {
     const { signOut, session } = useClerk();
     const router = useRouter();
     const [connections, setConnections] = useState<string[]>([]);
-    const { isLoaded: fbLoaded, loginWithFacebook } = useFacebookSDK();
+    const {
+        isLoaded: fbLoaded,
+        isChecking: fbChecking,
+        isConnected: fbConnected,
+        loginWithFacebook,
+        logout: fbLogout,
+        accessToken: fbAccessToken,
+        userID: fbUserID
+    } = useFacebookSDK();
 
     useEffect(() => {
         if (isLoaded && !isSignedIn) {
@@ -113,16 +121,33 @@ export default function DashboardPage() {
         }
     }, [isLoaded, isSignedIn, router, session]);
 
+    // Update connections when Facebook status changes
+    useEffect(() => {
+        if (fbConnected && !connections.includes('facebook')) {
+            setConnections([...connections, 'facebook']);
+
+            // TODO: Send to backend to save
+            console.log('Facebook connected:', { fbAccessToken, fbUserID });
+        } else if (!fbConnected && connections.includes('facebook')) {
+            setConnections(connections.filter(c => c !== 'facebook'));
+        }
+    }, [fbConnected, fbAccessToken, fbUserID]);
+
     const handleConnect = async (platformId: string) => {
-        if (platformId === 'facebook' && fbLoaded) {
-            try {
-                const response = await loginWithFacebook();
-                console.log('Facebook login successful:', response);
-                // TODO: Send access token to backend to save
-                setConnections([...connections, 'facebook']);
-            } catch (error) {
-                console.error('Facebook login failed:', error);
-                alert('Failed to connect Facebook. Please try again.');
+        if (platformId === 'facebook') {
+            if (fbConnected) {
+                // Already connected - disconnect
+                if (confirm('Disconnect from Facebook?')) {
+                    await fbLogout();
+                }
+            } else if (fbLoaded) {
+                // Not connected - connect
+                try {
+                    await loginWithFacebook();
+                } catch (error) {
+                    console.error('Facebook login failed:', error);
+                    alert('Failed to connect Facebook. Please try again.');
+                }
             }
         } else {
             // For other platforms, redirect to OAuth flow
