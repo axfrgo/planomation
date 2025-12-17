@@ -148,10 +148,12 @@ export default function DashboardPage() {
                     console.error('Facebook login failed:', error);
                     alert('Failed to connect Facebook. Please try again.');
                 }
+            } else {
+                alert('Facebook SDK is still loading. Please wait a moment and try again.');
             }
         } else {
-            // For other platforms, redirect to OAuth flow
-            window.location.href = `/api/auth/${platformId}/login`;
+            // For other platforms, show message that backend is required
+            alert(`${platformId.charAt(0).toUpperCase() + platformId.slice(1)} OAuth requires backend services.\n\nTo enable this:\n1. Deploy API Gateway & Scheduler Service to Railway/Render\n2. Add OAuth credentials to environment variables\n3. Update callback URLs in ${platformId} developer dashboard\n\nSee DEPLOYMENT.md for more details.`);
         }
     };
 
