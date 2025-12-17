@@ -4,6 +4,7 @@ import { useUser, useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { setAuthToken } from '../../lib/api';
+import { useFacebookSDK } from '../../lib/useFacebookSDK';
 
 const SOCIAL_PLATFORMS = [
     {
@@ -101,6 +102,7 @@ export default function DashboardPage() {
     const { signOut, session } = useClerk();
     const router = useRouter();
     const [connections, setConnections] = useState<string[]>([]);
+    const { isLoaded: fbLoaded, loginWithFacebook } = useFacebookSDK();
 
     useEffect(() => {
         if (isLoaded && !isSignedIn) {
@@ -111,9 +113,21 @@ export default function DashboardPage() {
         }
     }, [isLoaded, isSignedIn, router, session]);
 
-    const handleConnect = (platformId: string) => {
-        // Redirect to OAuth flow
-        window.location.href = `/api/auth/${platformId}/login`;
+    const handleConnect = async (platformId: string) => {
+        if (platformId === 'facebook' && fbLoaded) {
+            try {
+                const response = await loginWithFacebook();
+                console.log('Facebook login successful:', response);
+                // TODO: Send access token to backend to save
+                setConnections([...connections, 'facebook']);
+            } catch (error) {
+                console.error('Facebook login failed:', error);
+                alert('Failed to connect Facebook. Please try again.');
+            }
+        } else {
+            // For other platforms, redirect to OAuth flow
+            window.location.href = `/api/auth/${platformId}/login`;
+        }
     };
 
     if (!isLoaded || !isSignedIn) {
