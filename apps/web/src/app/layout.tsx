@@ -68,6 +68,23 @@ export default function RootLayout({
             </div>
           </header>
           {children}
+
+          {/* Footer */}
+          <footer className="mt-auto border-t border-gray-200 bg-white">
+            <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-600">
+                <p>© 2024 Planomation. All rights reserved.</p>
+                <div className="flex gap-6">
+                  <a href="/privacy" className="hover:text-gray-900 transition-colors">
+                    Privacy Policy
+                  </a>
+                  <a href="/terms" className="hover:text-gray-900 transition-colors">
+                    Terms of Service
+                  </a>
+                </div>
+              </div>
+            </div>
+          </footer>
         </body>
       </html>
     </ClerkProvider>
